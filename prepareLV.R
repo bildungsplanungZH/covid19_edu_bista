@@ -1,7 +1,7 @@
 # prepare BISTA LV data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 14.04.2020
+# Date: 20.04.2020
 ###############################################################################
 
 readMeta <- function(file = 'data/lv_meta.json')
@@ -17,10 +17,18 @@ getData <- function(file = 'data/lv.csv')
     data_t <- data_raw %>%
         rename_all(~c('jahr', 1:12)) %>%
         gather('monat', 'value', -.data$jahr) %>%
+        rename('value_raw' := .data$value) %>%
         mutate_all(as.integer) %>%
         arrange(.data$jahr, .data$monat) %>% 
         drop_na() %>%
-        mutate('date' := as.POSIXct(str_c(.data$jahr, .data$monat, '1', sep = '-')))
+        mutate('date' := as.POSIXct(str_c(.data$jahr, .data$monat, '1', sep = '-')),
+               'value' := case_when(.data$monat == 1 ~ .data$value_raw,
+                                    TRUE ~ .data$value_raw - lag(.data$value_raw, 1)))
+    
+    assert_that(identical(sum(data_t$value[which(data_t$jahr < 2020)], na.rm = T),
+                          sum(data_t$value_raw[which(data_t$monat == 12)])))
+    
+    # ggplot(data_t, aes(x = date, y = value)) + geom_line()
     
     meta <- readMeta() %>%
         purrr::imap_dfc(~tibble(!!.y := .x[[1]]))

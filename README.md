@@ -14,10 +14,12 @@ Daten der Bildungsstatistik im Rahmen des Projekts [Gesellschaftsmonitoring COVI
 
 ## Datenbestände
 
-### Anzahl abgeschlossener Lehrverträge
+### Anzahl abgeschlossener Lehrverträge pro Monat
 
-[description] https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrvertraege/
+https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrvertraege/
 
-Die Lehrverträge werden anhand des sogenannten Erfassungsdatums den Monaten zugeordnet. Dabei ist zu berücksichtigen, dass die Betriebe selber bestimmen in welchem Rhythmus sie ihre Lehrverträge dem Mittelschul- und Berufsbildungsamt (MBA) zur Erfassung übermitteln.
+Der Indikator bezeichnet die Anzahl der monatlich erfassten Lehrverträge mit Lehrvertragsbeginn im gleichen Kalenderjahr. Die Anzahl ist ein Nettowert, da auch Lehrvertragsauflösungen erfasst sind.
+
+Die Lehrverträge werden anhand des sogenannten Erfassungsdatums den Monaten zugeordnet, also dem Datum an dem sie durch das Mittelschul- und Berufsbildungsamt (MBA) erfasst werden. Dabei ist zu berücksichtigen, dass die Betriebe selber bestimmen in welchem Rhythmus sie ihre Lehrverträge dem MBA zur Erfassung übermitteln.
 
 In den Vorjahren bestand jeweils ein Rückstand bei der Erfassung von Lehrverträgen durch das MBA. Dies ist in der aktuellen Situation 2020 kaum der Fall.

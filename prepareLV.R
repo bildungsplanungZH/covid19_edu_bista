@@ -37,6 +37,7 @@ getData <- function(file = 'data/lv.csv')
     
     data_out <- data_t %>%
         bind_cols(meta %>% slice(rep(1, nrow(data_t)))) %>%
+        filter(.data$jahr >= 2019) %>%
         select(df_spec$name)
 }
 

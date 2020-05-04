@@ -25,7 +25,7 @@ hw_beta <- NULL
 hw_gamma <- NULL
 
 # function to get a single forecast point
-getSingleFC <- function(base_data, hw_alpha = NULL, hw_beta = FALSE, hw_gamma = .6)
+getSingleFC <- function(base_data, hw_alpha = NULL, hw_beta = NULL, hw_gamma = NULL)
 {
     # parse argument
     assert_that(is(base_data, 'data.frame'))
@@ -106,7 +106,8 @@ getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw
     assert_that(all.equal(unique(idx - lag(idx)), c(NA_integer_, 12, 1)))
     
     tbl_fc <- tbl_fc_all %>% slice(idx) %>%
-        left_join(base_data %>% select(.data$date, .data$value), by = 'date')
+        left_join(base_data %>% select(.data$date, .data$value), by = 'date') %>%
+        mutate_at(vars(matches('^fc_')), ~replace(.x, which(month(.data$date) == 8), NA))
     
     mean(purrr::map_dbl(ls_fc, ~mean(.x$fc$residuals ^ 2, na.rm = TRUE)))
     
@@ -119,19 +120,20 @@ getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw
     return(list('tbl' = tbl_fc, 'fc' = stats_fc))
 }
 
+
 test_1 <- getSingleFC(base_data = base_data %>% filter(.data$date <= fc_start))
-test_2 <- getSeriesFC(base_data = base_data, fc_start = fc_start)
+test_2 <- getSeriesFC(base_data = base_data, fc_start = fc_start, hw_beta = FALSE)
 test_2_plot <- ggplot(test_2$tbl, aes(x = date)) +
-    geom_ribbon(aes(ymin = fc_lower_95, ymax = fc_upper_95), fill = biplaR::getColorZH(1, 'zhpastel')) +
-    geom_line(aes(y = value), size = 1) +
+    geom_ribbon(aes(ymin = fc_lower_95, ymax = fc_upper_95), fill = biplaR::getColorZH(1, 'zhpastel'), na.rm = T) +
+    geom_line(aes(y = value), size = 1, na.rm = T) +
     scale_y_continuous(limits= )
 
-test_3_ls <- purrr::map(seq(0, 1, by = .1), ~getSeriesFC(base_data = base_data, fc_start = fc_start, hw_gamma = .x))
-test_3_data <- tibble('variable_short' := test_3_ls[[1]]$tbl$variable_short[1],
-                      'hw_gamma' := purrr::map_dbl(test_3_ls, ~.x$fc$model$gamma),
-                      'mean_residuals_bw' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_residuals_bw),
-                      'mean_variance_fc' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_variance_fc)) %>%
-    gather('cat', 'var', -.data$variable_short, -.data$hw_gamma)
-
-test_3_plot <- ggplot(test_3_data, aes(x = hw_gamma, y = var, colour = cat)) +
-    geom_line()
+# test_3_ls <- purrr::map(seq(0, 1, by = .1), ~getSeriesFC(base_data = base_data, fc_start = fc_start, hw_gamma = .x))
+# test_3_data <- tibble('variable_short' := test_3_ls[[1]]$tbl$variable_short[1],
+#                       'hw_gamma' := purrr::map_dbl(test_3_ls, ~.x$fc$model$gamma),
+#                       'mean_residuals_bw' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_residuals_bw),
+#                       'mean_variance_fc' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_variance_fc)) %>%
+#     gather('cat', 'var', -.data$variable_short, -.data$hw_gamma)
+# 
+# test_3_plot <- ggplot(test_3_data, aes(x = hw_gamma, y = var, colour = cat)) +
+#     geom_line()

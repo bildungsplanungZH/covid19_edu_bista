@@ -82,10 +82,11 @@ saveData <- function(flag)
 
     if( flag) 
         {
-        data_prep <- getData()
+        data_prep <- getData() %>% 
+            filter(.data$date >= '2018-09-01', !is.na(.data$topic))
         test <- testTable(data_prep)
         save_data <- TRUE
-        write.table(data_prep %>% filter(.data$date >= '2018-09-01', !is.na(.data$topic)), "./Bildung_Lehrstellen.csv", sep=",", fileEncoding="UTF-8", row.names = F)
+        write.table(data_prep, "./Bildung_Lehrstellen.csv", sep=",", fileEncoding="UTF-8", row.names = F)
     }
 }
 

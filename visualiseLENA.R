@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 1.05.2020
+# Date: 7.05.2020
 ###############################################################################
 
 library(TTR)
@@ -17,12 +17,6 @@ data <- getData() %>%
     group_by(.data$variable_short, .data$sj) %>%
     mutate('value_corr' := .data$value %>% replace_na(mean(.data$value, na.rm = T))) %>%
     ungroup()
-
-base_data <- data %>% filter(.data$variable_short %in% 'lehrstellen_offen')
-fc_start <- '2017-08-01'
-hw_alpha <- NULL 
-hw_beta <- NULL
-hw_gamma <- NULL
 
 # function to get a single forecast point
 getSingleFC <- function(base_data, hw_alpha = NULL, hw_beta = NULL, hw_gamma = NULL)
@@ -120,20 +114,40 @@ getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw
     return(list('tbl' = tbl_fc, 'fc' = stats_fc))
 }
 
+plotFC <- function()
+{
+    hw_alpha <- .8
+    hw_beta <- 0
+    hw_gamma <- .1
+    
+    fc_total <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_total'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
+    fc_offen <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_offen'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
+    fc_besetzt <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_besetzt'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
+    
+    test_2_plotdata <- fc_total$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01')) %>%
+        bind_rows(fc_offen$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01'))) %>%
+        bind_rows(fc_besetzt$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01'))) %>%
+        mutate_at('variable_short', ~fct_inorder(.x) %>% fct_relabel(~str_replace(.x, 'lehrstellen_', '')))
+    
+    test_2_plot <- ggplot(test_2_plotdata, aes(x = date)) +
+        geom_ribbon(aes(ymin = fc_lower_95, ymax = fc_upper_95, fill = variable_short), na.rm = T, alpha = .3) +
+        geom_line(aes(y = value, colour = variable_short), size = biplaR::geom_args$line$size, na.rm = T) +
+        geom_point(aes(y = value, colour = variable_short), size = biplaR::geom_args$point$size, na.rm = T) +
+        coord_cartesian(ylim = c(0, NA)) +
+        scale_x_datetime(date_labels = '%b %Y', date_minor_breaks = '1 month') +
+        scale_y_continuous(breaks = seq(0, 12000, by = 3000), minor_breaks = seq(0, 12000, by = 1000)) +
+        scale_fill_manual('statistische erwartbare Werte', values = biplaR::getColorZH(3, 'zhlight'), guide = guide_legend(nrow = 1, order = 2)) +
+        scale_colour_manual('tatsächliche Werte', values = biplaR::getColorZH(3, 'zh'), guide = guide_legend(nrow = 1, order = 1)) +
+        labs('title' = 'Lehrstellensituation im Kanton Zürich', 'subtitle' = 'gemäss kantonalem Lehrstellen-Nachweis', 'caption' = 'Daten: Bildungsstatistik Kanton Zürich/Gesellschaftsmonitoring Covid-19 STAT') +
+        biplaR::getTheme(c('no_axis_title')) +
+        theme(legend.margin = margin(3.2, 25.6, 0, 25.6, 'pt'),
+              plot.title = element_text(size = rel(1)), 
+              plot.subtitle = element_text(size = rel(.8)), 
+              plot.caption = element_text(size = rel(.6)))
 
-test_1 <- getSingleFC(base_data = base_data %>% filter(.data$date <= fc_start))
-test_2 <- getSeriesFC(base_data = base_data, fc_start = fc_start, hw_beta = FALSE)
-test_2_plot <- ggplot(test_2$tbl, aes(x = date)) +
-    geom_ribbon(aes(ymin = fc_lower_95, ymax = fc_upper_95), fill = biplaR::getColorZH(1, 'zhpastel'), na.rm = T) +
-    geom_line(aes(y = value), size = 1, na.rm = T) +
-    scale_y_continuous(limits= )
+    plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img')
+        
+    return(list('plot_ref' = plot, 'fc' = list(fc_total$fc, fc_offen$fc, fc_besetzt$fc)))
+}
 
-# test_3_ls <- purrr::map(seq(0, 1, by = .1), ~getSeriesFC(base_data = base_data, fc_start = fc_start, hw_gamma = .x))
-# test_3_data <- tibble('variable_short' := test_3_ls[[1]]$tbl$variable_short[1],
-#                       'hw_gamma' := purrr::map_dbl(test_3_ls, ~.x$fc$model$gamma),
-#                       'mean_residuals_bw' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_residuals_bw),
-#                       'mean_variance_fc' := purrr::map_dbl(test_3_ls, ~.x$fc$mean_variance_fc)) %>%
-#     gather('cat', 'var', -.data$variable_short, -.data$hw_gamma)
-# 
-# test_3_plot <- ggplot(test_3_data, aes(x = hw_gamma, y = var, colour = cat)) +
-#     geom_line()
+res <- plotFC()

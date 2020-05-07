@@ -43,3 +43,11 @@ https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrstellen/
 Der Indikator beschreibt die Anzahl Lehrstellen mit Lehrvertragsbeginn im kommenden Schuljahr, die ausgeschrieben und besetzt sind.
 
 Datenbasis ist ebenfalls der kantonale Lehrstellen-Nachweis [LENA](https://www.berufsberatung.ch/dyn/show/2930). Die Erfassung der Lehrstellen erfolgt jeweils per Ende Monat.
+
+## Auswertungen
+
+Es wird erwartet, dass sich die Massnahmen, die der Bundesrat als Reaktion auf die sogenannte Corona-Krise definiert hat, unter anderem auf die Lehrstellensituation auswirkt. Die Daten aus dem kantonalen Lehrstellen-Nachweis ermöglichen eine Überprüfung dieser Vermutung für den Kanton Zürich.
+
+![](img/plote5cc3b32b8.png)
+
+Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet. Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.

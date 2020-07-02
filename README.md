@@ -52,6 +52,6 @@ Datenbasis ist ebenfalls der kantonale Lehrstellen-Nachweis [LENA](https://www.b
 
 Es wird erwartet, dass sich die Massnahmen, die der Bundesrat als Reaktion auf die sogenannte Corona-Krise definiert hat, unter anderem auf die Lehrstellensituation auswirkt. Die Daten aus dem kantonalen Lehrstellen-Nachweis ermöglichen eine Überprüfung dieser Vermutung für den Kanton Zürich.
 
-![](img/plotc88549b4fbb.png)
+![](img/plot1c444e181019.png)
 
 Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet. Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.

@@ -18,7 +18,7 @@ Flavian Imlig <flavian.imlig@bi.zh.ch>, Bildungsdirektion, Bildungsplanung
 
 ## Datenbestände
 
-### Anzahl abgeschlossener Lehrverträge pro Monat
+### Anzahl abgeschlossener Lehrverträge
 
 https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrvertraege/
 
@@ -30,23 +30,15 @@ Die bereits im Vorjahr abgeschlossenen Lehrverträge werden jeweils dem Januar d
 
 In den Vorjahren bestand jeweils ein Rückstand bei der Erfassung von Lehrverträgen durch das MBA. Dies ist in der aktuellen Situation 2020 kaum der Fall.
 
-### offene Lehrstellen
+### offene und besetzte Lehrstellen
 
 https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrstellen/
 
-Der Indikator beschreibt die Anzahl ausgeschriebener und noch offener Lehrstellen mit Lehrvertragsbeginn im kommenden Schuljahr.
+Der Indikator beschreibt die Anzahl ausgeschriebener Lehrstellen mit Lehrvertragsbeginn im kommenden Schuljahr, die noch offen oder besetzt sind.
 
 Erfasst werden die Lehrstellen im kantonalen Lehrstellen-Nachweis [LENA](https://www.berufsberatung.ch/dyn/show/2930). Die Erfassung der Lehrstellen erfolgt jeweils per Ende Monat.
 
 Erfasst werden nur Lehrstellen mit Lehrbeginn im jeweils kommenden August. Eine Jahreszeitreihe umfasst September bis Juli. Da im August die Umstellung auf das neue Lehrjahr erfolgt, sind die Lehrstellen nicht immer eindeutig einem Lehrjahr zuzuordnen. Die Daten des Monats August werden deshalb nicht ausgewiesen.
-
-### besetzte Lehrstellen
-
-https://pub.bista.zh.ch/de/zahlen-und-fakten/andere/lehrstellen/
-
-Der Indikator beschreibt die Anzahl Lehrstellen mit Lehrvertragsbeginn im kommenden Schuljahr, die ausgeschrieben und besetzt sind.
-
-Datenbasis ist ebenfalls der kantonale Lehrstellen-Nachweis [LENA](https://www.berufsberatung.ch/dyn/show/2930). Die Erfassung der Lehrstellen erfolgt jeweils per Ende Monat.
 
 ## Auswertungen
 
@@ -54,6 +46,7 @@ Es wurde allgemein erwartet, dass sich die Massnahmen, die der Bundesrat als Rea
 
 Insgesamt waren im Schuljahr 2019/20 bezüglich der besetzten und offenen Lehrstellen keine massiven Abweichungen gegenüber den Vorjahren zu verzeichnen.
 
-![](img/plot2ba879b5ad7.png)
+![](img/plot84c25754a1e.png)
 
-Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet. Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.
+Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet.  
+Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.

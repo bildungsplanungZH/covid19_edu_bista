@@ -1,7 +1,7 @@
 # prepare BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 1.05.2020
+# Date: 24.11.2020
 ###############################################################################
 
 readMeta <- function(file = 'data/lena_meta.json')
@@ -80,8 +80,7 @@ saveData <- function(flag)
     assert_that(is.flag(save_data))
     assert_that(noNA(save_data))
 
-    if( flag) 
-        {
+    if( flag ) {
         data_prep <- getData() %>% 
             filter(.data$date >= '2018-09-01', !is.na(.data$topic))
         test <- testTable(data_prep)

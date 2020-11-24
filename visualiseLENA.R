@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 11.06.2020
+# Date: 24.11.2020
 ###############################################################################
 
 library(TTR)
@@ -121,22 +121,27 @@ plotFC <- function()
     hw_gamma <- .1
     
     fc_start <- '2017-09-01'
+    fc_interval <- interval('2019-08-01', '2020-10-01')
     
     fc_total <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_total'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     fc_offen <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_offen'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     fc_besetzt <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_besetzt'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     
-    test_2_plotdata <- fc_total$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01')) %>%
-        bind_rows(fc_offen$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01'))) %>%
-        bind_rows(fc_besetzt$tbl %>% filter(.data$date %within% interval('2019-08-01', '2020-07-01'))) %>%
-        mutate_at('variable_short', ~fct_inorder(.x) %>% fct_relabel(~str_replace(.x, 'lehrstellen_', '')))
+    test_2_plotdata <- fc_total$tbl %>% filter(.data$date %within% fc_interval) %>%
+        bind_rows(fc_offen$tbl %>% filter(.data$date %within% fc_interval)) %>%
+        bind_rows(fc_besetzt$tbl %>% filter(.data$date %within% fc_interval)) %>%
+        filter(month(.data$date) != 8) %>%
+        mutate_at('variable_short', ~fct_inorder(.x) %>% fct_relabel(~str_replace(.x, 'lehrstellen_', ''))) %>%
+        mutate('sj' := biplaR::cutDatesToSchoolYear(as.Date(.data$date)),
+               'month' := fct_inorder(format(.data$date, '%b')))
     
-    test_2_plot <- ggplot(test_2_plotdata, aes(x = date)) +
+    test_2_plot <- ggplot(test_2_plotdata, aes(x = as.integer(month))) +
         geom_ribbon(aes(ymin = fc_lower_95, ymax = fc_upper_95, fill = variable_short), na.rm = T, alpha = .3) +
         geom_line(aes(y = value, colour = variable_short), size = biplaR::geom_args$line$size, na.rm = T) +
         geom_point(aes(y = value, colour = variable_short), size = biplaR::geom_args$point$size, na.rm = T) +
+        facet_wrap('sj', nrow = 2) +
         coord_cartesian(ylim = c(0, NA)) +
-        scale_x_datetime(date_labels = '%b %Y', date_minor_breaks = '1 month') +
+        scale_x_continuous(breaks = 1:nlevels(test_2_plotdata$month), minor_breaks = c(), labels = levels(test_2_plotdata$month)) +
         scale_y_continuous(breaks = seq(0, 12000, by = 3000), minor_breaks = seq(0, 12000, by = 1000)) +
         scale_fill_manual('statistisch erwartbare Werte', values = biplaR::getColorZH(3, 'zhlight'), guide = guide_legend(nrow = 1, order = 2)) +
         scale_colour_manual('tatsächliche Werte', values = biplaR::getColorZH(3, 'zh'), guide = guide_legend(nrow = 1, order = 1)) +
@@ -147,7 +152,8 @@ plotFC <- function()
               plot.subtitle = element_text(size = rel(.8)), 
               plot.caption = element_text(size = rel(.6)))
 
-    plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img')
+    plot_height <- ifelse(nlevels(test_2_plotdata$sj) > 1, biplaR::plot_dims$height * 1.6, biplaR::plot_dims$height)
+    plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img', height = plot_height)
         
     return(list('plot_ref' = plot, 'fc' = list(fc_total$fc, fc_offen$fc, fc_besetzt$fc)))
 }

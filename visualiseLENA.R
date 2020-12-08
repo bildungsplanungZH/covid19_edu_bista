@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 24.11.2020
+# Date: 8.12.2020
 ###############################################################################
 
 library(TTR)
@@ -121,7 +121,7 @@ plotFC <- function()
     hw_gamma <- .1
     
     fc_start <- '2017-09-01'
-    fc_interval <- interval('2019-08-01', '2020-10-01')
+    fc_interval <- interval('2019-08-01', max(data$date))
     
     fc_total <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_total'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     fc_offen <- getSeriesFC(base_data = data %>% filter(.data$variable_short %in% 'lehrstellen_offen'), fc_start = fc_start, hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)

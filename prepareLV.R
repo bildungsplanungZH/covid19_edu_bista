@@ -1,7 +1,7 @@
 # prepare BISTA LV data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 20.04.2020
+# Date: 5.01.2020
 ###############################################################################
 
 readMeta <- function(file = 'data/lv_meta.json')
@@ -25,8 +25,16 @@ getData <- function(file = 'data/lv.csv')
                'value' := case_when(.data$monat == 1 ~ .data$value_raw,
                                     TRUE ~ .data$value_raw - lag(.data$value_raw, 1)))
     
-    assert_that(identical(sum(data_t$value[which(data_t$jahr < 2020)], na.rm = T),
-                          sum(data_t$value_raw[which(data_t$monat == 12)])))
+    data_chk <- data_t %>%
+        group_by(.data$jahr) %>%
+        summarize('n' := n(),
+                  'a' := tail(na.omit(.data$value_raw, 1), 1),
+                  'b' := sum(.data$value, na.rm = TRUE)) %>%
+        ungroup() %>%
+        mutate('chk' := identical(.data$a, .data$b)) %>%
+        filter(.data$n %in% 12, rlang::is_false(.data$chk))
+    
+    assert_that(nrow(data_chk) == 0, msg = sprintf('Data check failed for year(s) %s', str_c(data_chk$jahr, sep = ', ')))
     
     # ggplot(data_t, aes(x = date, y = value)) + geom_line()
     

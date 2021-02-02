@@ -68,3 +68,8 @@ testTable <- function(df)
 dat_prep <- getData()
 test <- testTable(dat_prep)
 write.table(dat_prep, "./Bildung_Lehrvertraege.csv", sep=",", fileEncoding="UTF-8", row.names = F)
+
+if( FALSE ) {
+    ggplot(dat_prep, aes(x = date, y = value, group = variable_short)) +
+               geom_line()
+}

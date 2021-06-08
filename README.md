@@ -46,7 +46,7 @@ Es wurde allgemein erwartet, dass sich die Massnahmen, die der Bundesrat als Rea
 
 Insgesamt waren im Schuljahr 2019/20 bezüglich der besetzten und offenen Lehrstellen keine massiven Abweichungen gegenüber den Vorjahren zu verzeichnen. Im Schuljahr 2020/21 ist der Verlauf zwar entsprechend der modellierten Erwartung, die absoluten Zahlen liegen aber tiefer.
 
-![](img/plot34c8526a1531.png)
+![](img/plot1120d3e69c9.png)
 
 Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet.  
 Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.

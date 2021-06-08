@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 8.12.2020
+# Date: 8.06.2021
 ###############################################################################
 
 library(TTR)
@@ -45,6 +45,8 @@ getSingleFC <- function(base_data, hw_alpha = NULL, hw_beta = NULL, hw_gamma = N
     ts_fcm <- HoltWinters(x = ts_base, alpha = hw_alpha, beta = hw_beta, gamma = hw_gamma, seasonal = 'add')
     ts_fc <- forecast(ts_fcm, h = 12)
     
+    predict(ts_fcm, n.ahead = 12, prediction.interval = TRUE)
+    
     # extract infos
     fc_dates <- matrix(c(start(ts_fc$mean), end(ts_fc$mean)), ncol = 2, byrow = TRUE) %>% 
         as.data.frame() %>%
@@ -64,7 +66,7 @@ getSingleFC <- function(base_data, hw_alpha = NULL, hw_beta = NULL, hw_gamma = N
         mutate_if(rlang::is_named, unname)
     
     # format, return
-    return(list('tbl' = tbl_fc, 'fc' = ts_fc))
+    return(list('tbl' = tbl_fc, 'fc' = ts_fcm))
 }
 
 getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw_gamma = NULL)
@@ -86,7 +88,10 @@ getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw
     assert_that(length(fc_start) == 1)
     
     # get possible last value dates
-    lv_dates <- base_data %>% filter(.data$date >= fc_start) %>% pull(.data$date)
+    lv_dates <- base_data %>% 
+        filter(.data$date >= fc_start) %>% 
+        filter(month(.data$date) %in% 8)
+        pull(.data$date)
     
     # get single forcasts
     ls_fc <- purrr::map(lv_dates, ~getSingleFC(base_data = base_data %>% filter(.data$date <= .x), hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma))
@@ -114,12 +119,100 @@ getSeriesFC <- function(base_data, fc_start, hw_alpha = NULL, hw_beta = NULL, hw
     return(list('tbl' = tbl_fc, 'fc' = stats_fc))
 }
 
+getSingleFC_2 <- function(base_data, sj_s, hw_alpha, hw_beta, hw_gamma)
+{
+    # parse arguments
+    assert_that(is(base_data, 'data.frame'))
+    
+    assert_that(has_name(base_data, 'variable_short'))
+    assert_that(is(base_data$variable_short, 'character'))
+    assert_that(length(unique(base_data$variable_short)) == 1)
+    
+    assert_that(has_name(base_data, 'date'))
+    assert_that(is(base_data$date, 'POSIXct'))
+    assert_that(has_name(base_data, 'sj'))
+    assert_that(is.ordered(base_data$sj))
+    
+    assert_that(is.string(sj_s))
+    assert_that(sj_s %in% levels(base_data$sj))
+    assert_that(is.number(hw_alpha))
+    assert_that(is.number(hw_beta))
+    assert_that(is.number(hw_gamma))
+    
+    # define dates
+    tbl_dates <- base_data %>%
+        count(.data$sj, .data$date) %>%
+        select(-.data$n) %>%
+        filter(.data$sj < sj_s) %>%
+        mutate('start' := lubridate::month(.data$date) %in% 9,
+               'end' := lubridate::month(.data$date) %in% 7,
+               'first' := seq_along(.data$date) %in% (which(.data$start) %>% head(1)),
+               'last' := seq_along(.data$date) %in% (which(.data$end) %>% tail(1)))
+    ts_range <- c(tbl_dates$date[tbl_dates$first], tbl_dates$date[tbl_dates$last])
+    ts_start <- c(lubridate::year(ts_range[1]), lubridate::month(ts_range[1]))
+    
+    # filter data
+    base_data_s <- base_data %>%
+        filter(.data$date %>% between(ts_range[1], ts_range[2]))
+    
+    # get ts, model and forecast
+    ts_base <- ts(base_data_s$value_corr, frequency = 12, start = ts_start)
+    ts_decomp <- decompose(ts_base, type = 'add')
+    ts_fcm <- HoltWinters(x = ts_base, alpha = hw_alpha, beta = hw_beta, gamma = hw_gamma, seasonal = 'add')
+    ts_fc <- predict(ts_fcm, n.ahead = 12, prediction.interval = TRUE)
+    ts_fc2 <- forecast(ts_fcm, h = 12)
+    
+    # format, return
+    tbl_sj <- data.frame('raw' = time(ts_fc)) %>%
+        mutate('year' := floor(.data$raw), 'month' := round((.data$raw - .data$year) * 12 + 1),
+               'date' := lubridate::ymd(str_c(.data$year, round(.data$month), '1', sep = '-')),
+               'sj' := biplaR::cutDatesToSchoolYear(.data$date) %>% as.character,
+               'variable_short' := unique(base_data$variable_short),
+               'last_value_date' := max(base_data_s$date))
+    
+    tbl_fc <- data.frame(as.matrix(ts_fc)) %>%
+        bind_cols(tbl_sj) %>%
+        select(all_of(c('date', 'sj', 'variable_short', 'fc_lower_95' = 'lwr', 'fc_upper_95' = 'upr', 'last_value_date')))
+        
+    return(list('tbl' = tbl_fc, 'fc' = ts_fcm))
+}
+
+getSeriesFC_2 <- function(base_data, sj_s = c('2019/20', '2020/21'), hw_alpha = .8, hw_beta = 0, hw_gamma = .1)
+{
+    tbl_def <- expand.grid('sj_s' = sj_s, 
+                           'variable_short' = c('lehrstellen_total', 'lehrstellen_offen', 'lehrstellen_besetzt'),
+                           stringsAsFactors = F)
+    
+    results <- purrr::pmap(tbl_def, ~getSingleFC_2(base_data = base_data %>% filter(.data$variable_short %in% ..2), sj_s = ..1, 
+                                               hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma))
+    results_table <- purrr::map_dfr(results, ~.x$tbl) %>%
+        mutate_at('sj', ~ordered(.x, levels = sort(union(levels(base_data$sj), .x))))
+    
+    nm_join <- c('date', 'sj', 'variable_short')
+    assert_that(identical(nrow(base_data), base_data %>% select(all_of(nm_join)) %>% nrow()))
+    assert_that(identical(nrow(results_table), results_table %>% select(all_of(nm_join)) %>% nrow()))
+    data_tbl <- base_data %>%
+        mutate_at('sj', ~ordered(as.character(.x), levels = levels(results_table$sj))) %>%
+        full_join(results_table, by = nm_join) %>%
+        mutate_at(vars(matches('^fc_')), ~replace(.x, which(month(.data$date) == 8), NA))
+    
+    # stats_fc <- list('method' = str(results[[1]]$fc)
+                     # 'model' = ls_fc[[1]]$fc$model,
+                     # 'var_bw' = mean(purrr::map_dbl(ls_fc, ~mean(.x$fc$residuals ^ 2, na.rm = TRUE))),
+                     # 'var_fc' = mean((tbl_fc$value - tbl_fc$fc_mean) ^ 2, na.rm = TRUE))
+    
+    # format, return
+    return(list('tbl' = data_tbl, 'fc' = purrr::map(results, ~.x$fc) %>% purrr::set_names(str_c(tbl_def$variable_short, tbl_def$sj_s, sep = ', '))))
+    # return(list('tbl' = tbl_fc, 'fc' = stats_fc))
+}
+
 plotFC <- function()
 {
     hw_alpha <- .8
     hw_beta <- 0
     hw_gamma <- .1
     
+    if( FALSE ) {
     fc_start <- '2017-09-01'
     fc_interval <- interval('2019-08-01', max(data$date))
     
@@ -154,8 +247,40 @@ plotFC <- function()
 
     plot_height <- ifelse(nlevels(test_2_plotdata$sj) > 1, biplaR::plot_dims$height * 1.6, biplaR::plot_dims$height)
     plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img', height = plot_height)
-        
-    return(list('plot_ref' = plot, 'fc' = list(fc_total$fc, fc_offen$fc, fc_besetzt$fc)))
+    }
+    
+    sj_s <- c('2019/20', '2020/21')
+    result_2 <- getSeriesFC_2(base_data = data, sj_s = sj_s,
+                              hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
+    plot_data_2 <- result_2$tbl %>%
+        mutate_at('variable_short', ~fct_inorder(.x) %>% fct_relabel(~str_replace(.x, 'lehrstellen_', ''))) %>%
+        filter(.data$sj %in% sj_s) %>%
+        drop_na(.data$fc_lower_95) %>%
+        droplevels()
+    
+    plot_args <- list('colour' = biplaR::getColorZH(n = nlevels(plot_data_2$variable_short), name = 'zh', with_zh_blue = F),
+                      'guide' = guide_legend(nrow = 1),
+                      'legend_caption' = c('tatsächliche Werte', 'statistisch erwartbare Werte'),
+                      'title' = 'Lehrstellensituation im Kanton Zürich',
+                      'subtitle' = 'gemäss kantonalem Lehrstellen-Nachweis', 
+                      'caption' = 'Daten: Bildungsstatistik Kanton Zürich/Gesellschaftsmonitoring Covid-19 STAT',
+                      'path' = 'img',
+                      'height' = ifelse(nlevels(plot_data_2$sj) > 1, biplaR::plot_dims$height * 1.6, biplaR::plot_dims$height))
+    
+    plot_2 <- ggplot(plot_data_2, aes_string(x = 'date', y = 'value')) +
+        geom_ribbon(aes_string(ymin = 'fc_lower_95', ymax = 'fc_upper_95', fill = 'variable_short'), na.rm = T, colour = NA, alpha = .3) +
+        geom_line(aes_string(colour = 'variable_short'), size = biplaR::geom_args$line$size, na.rm = T) +
+        geom_point(aes_string(colour = 'variable_short'), size = biplaR::geom_args$point$size, na.rm = T) +
+        facet_wrap('sj', nrow = 2, scales = 'free_x') +
+        coord_cartesian(ylim = c(0, NA)) +
+        scale_colour_manual(plot_args$legend_caption[1], values = plot_args$colour, guide = plot_args$guide) +
+        scale_fill_manual(plot_args$legend_caption[2], values = plot_args$colour, guide = plot_args$guide) +
+        labs(title = plot_args$title, subtitle = plot_args$subtitle, caption = plot_args$caption) +
+        biplaR::getTheme(c('no_axis_title'))
+    plot_ref <- biplaR::savePlot(plot_2, tmpdir = plot_args$path, height = plot_args$height)
+    
+    
+    return(list('plot' = plot_2, 'plot_ref' = plot_ref, 'fc' = result_2$fc))
 }
 
 res <- plotFC()

@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 8.06.2021
+# Date: 7.12.2021
 ###############################################################################
 
 library(TTR)
@@ -249,7 +249,7 @@ plotFC <- function()
     plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img', height = plot_height)
     }
     
-    sj_s <- c('2019/20', '2020/21')
+    sj_s <- c('2019/20', '2020/21', '2021/22')
     result_2 <- getSeriesFC_2(base_data = data, sj_s = sj_s,
                               hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     plot_data_2 <- result_2$tbl %>%
@@ -265,13 +265,13 @@ plotFC <- function()
                       'subtitle' = 'gemäss kantonalem Lehrstellen-Nachweis', 
                       'caption' = 'Daten: Bildungsstatistik Kanton Zürich/Gesellschaftsmonitoring Covid-19 STAT',
                       'path' = 'img',
-                      'height' = ifelse(nlevels(plot_data_2$sj) > 1, biplaR::plot_dims$height * 1.6, biplaR::plot_dims$height))
+                      'height' = ifelse(nlevels(plot_data_2$sj) > 1, biplaR::plot_dims$height * 2.2, biplaR::plot_dims$height))
     
     plot_2 <- ggplot(plot_data_2, aes_string(x = 'date', y = 'value')) +
         geom_ribbon(aes_string(ymin = 'fc_lower_95', ymax = 'fc_upper_95', fill = 'variable_short'), na.rm = T, colour = NA, alpha = .3) +
         geom_line(aes_string(colour = 'variable_short'), size = biplaR::geom_args$line$size, na.rm = T) +
         geom_point(aes_string(colour = 'variable_short'), size = biplaR::geom_args$point$size, na.rm = T) +
-        facet_wrap('sj', nrow = 2, scales = 'free_x') +
+        facet_wrap('sj', ncol = 1, scales = 'free_x') +
         coord_cartesian(ylim = c(0, NA)) +
         scale_colour_manual(plot_args$legend_caption[1], values = plot_args$colour, guide = plot_args$guide) +
         scale_fill_manual(plot_args$legend_caption[2], values = plot_args$colour, guide = plot_args$guide) +

@@ -256,7 +256,8 @@ plotFC <- function()
         mutate_at('variable_short', ~fct_inorder(.x) %>% fct_relabel(~str_replace(.x, 'lehrstellen_', ''))) %>%
         filter(.data$sj %in% sj_s) %>%
         drop_na(.data$fc_lower_95) %>%
-        droplevels()
+        droplevels() %>%
+        mutate_at('date', as.Date)
     
     plot_args <- list('colour' = biplaR::getColorZH(n = nlevels(plot_data_2$variable_short), name = 'zh', with_zh_blue = F),
                       'guide' = guide_legend(nrow = 1),
@@ -273,6 +274,7 @@ plotFC <- function()
         geom_point(aes_string(colour = 'variable_short'), size = biplaR::geom_args$point$size, na.rm = T) +
         facet_wrap('sj', ncol = 1, scales = 'free_x') +
         coord_cartesian(ylim = c(0, NA)) +
+        scale_x_date(minor_breaks = '1 month') +
         scale_colour_manual(plot_args$legend_caption[1], values = plot_args$colour, guide = plot_args$guide) +
         scale_fill_manual(plot_args$legend_caption[2], values = plot_args$colour, guide = plot_args$guide) +
         labs(title = plot_args$title, subtitle = plot_args$subtitle, caption = plot_args$caption) +

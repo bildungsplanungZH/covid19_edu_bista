@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 7.12.2021
+# Date: 3.05.2022
 ###############################################################################
 
 library(TTR)
@@ -15,7 +15,7 @@ source('prepareLENA.R')
 data <- getData() %>%
     mutate('sj' := biplaR::cutDatesToSchoolYear(as.Date(.data$date))) %>%
     group_by(.data$variable_short, .data$sj) %>%
-    mutate('value_corr' := .data$value %>% replace_na(mean(.data$value, na.rm = T))) %>%
+    mutate('value_corr' := .data$value %>% replace_na(as.integer(round(mean(.data$value, na.rm = T))))) %>%
     ungroup()
 
 # function to get a single forecast point

@@ -42,11 +42,11 @@ Erfasst werden nur Lehrstellen mit Lehrbeginn im jeweils kommenden August. Eine 
 
 ## Auswertungen
 
-Es wurde allgemein erwartet, dass sich die Massnahmen, die der Bundesrat als Reaktion auf die sogenannte Corona-Krise definiert hat, unter anderem auf die Lehrstellensituation auswirken. Die Daten aus dem kantonalen Lehrstellen-Nachweis ermöglichen eine Überprüfung dieser Vermutung für den Kanton Zürich.
+Es wurde allgemein erwartet, dass sich die Massnahmen, die der Bundesrat ab Februar 2020 als Reaktion auf die sogenannte Corona-Krise definiert hat, unter anderem auf die Lehrstellensituation auswirken. Die Daten aus dem kantonalen Lehrstellen-Nachweis ermöglichen eine Überprüfung dieser Vermutung für den Kanton Zürich.
 
-Insgesamt waren im Schuljahr 2019/20 bezüglich der besetzten und offenen Lehrstellen keine massiven Abweichungen gegenüber den Vorjahren zu verzeichnen. Im Schuljahr 2020/21 ist der Verlauf zwar entsprechend der modellierten Erwartung, die absoluten Zahlen liegen aber tiefer, insbesondere bei den besetzten Lehrstellen. Für das Schuljahr 2021/22 zeichnet sich ein ähnlicher Verlauf ab.
+Insgesamt waren im Schuljahr 2019/20 bezüglich der besetzten und offenen Lehrstellen keine massiven Abweichungen gegenüber den Vorjahren zu verzeichnen. Im Schuljahr 2020/21 waren insgesamt weniger Lehrstellen erfasst, und zwar in absoluten Zahlen als auch gegenüber dem Prognosemodell. Für das Schuljahr 2021/22 liegen die absoluten Zahlen nochmals tiefer, allerdings nicht mehr ausserhalb der Werte des Prognosemodells, in das die Daten aus 2020/21 einfliessen.
 
-![](img/plot17fc627a70cd.png)
+![](img/plot3aac67cc2db7.png)
 
 Die statistisch erwartbaren Werte werden mittels eines Prognosemodells auf der Basis der Daten seit 2013 berechnet.  
 Zum Einsatz kommt die Methode von Holt-Winters mit additiver Saison und den Parametern $\alpha = 0.8$, $\beta = 0$ und $\gamma = 0.1$. Dargestellt sind die Werte des $95\%$-Konfidenzintervalls.

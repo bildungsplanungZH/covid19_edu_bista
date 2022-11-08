@@ -1,7 +1,7 @@
 # load LENA data from csv
 # 
 # author: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# date: 8.12.2020
+# date: 8.11.2022
 ###############################################################################
 
 combineData <- function(...)
@@ -41,9 +41,9 @@ getBaseData <- function(...)
     
     data <- left_join(
         readCSV(file = files$total) %>%
-            rename('Lehrstellen_Total' := .data$n),
+            rename('Lehrstellen_Total' := 'value'),
         readCSV(file = files$offen) %>%
-            rename('Lehrstellen_Offen' := .data$n),
+            rename('Lehrstellen_Offen' := 'value'),
         by = c('date', 'Jahr', 'Monat')) %>%
         mutate('Lehrstellen_Besetzt' := (.data[['Lehrstellen_Total']] - .data[['Lehrstellen_Offen']]),
                'mode' := 'base')
@@ -54,7 +54,10 @@ readCSV <- function(file, ...)
     data_raw <- read.csv(file) %>%
         rename_all(str_extract, pattern = '\\w{2,}')
     
-    data_t <- gather(data_raw, key = 'Monat', value = 'n', -.data$Jahr) %>%
+    nm_cols <- names(data_raw)[-1]
+    
+    data_t <- data_raw %>%
+        pivot_longer(all_of(nm_cols), names_to = 'Monat') %>%
         mutate_at('Monat', ~as.integer(fct_inorder(.x))) %>%
         mutate('date' := lubridate::ymd(str_c(.data$Jahr, .data$Monat, '1', sep = '.'))) %>%
         arrange(.data$date) %>%

@@ -1,7 +1,7 @@
 # prepare BISTA LV data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 5.01.2020
+# Date: 8.11.2022
 ###############################################################################
 
 readMeta <- function(file = 'data/lv_meta.json')
@@ -16,8 +16,8 @@ getData <- function(file = 'data/lv.csv')
     
     data_t <- data_raw %>%
         rename_all(~c('jahr', 1:12)) %>%
-        gather('monat', 'value', -.data$jahr) %>%
-        rename('value_raw' := .data$value) %>%
+        pivot_longer(all_of(as.character(1:12)), names_to = 'monat') %>%
+        rename('value_raw' := 'value') %>%
         mutate_all(as.integer) %>%
         arrange(.data$jahr, .data$monat) %>% 
         drop_na() %>%

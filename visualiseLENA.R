@@ -1,7 +1,7 @@
 # visualize BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 3.05.2022
+# Date: 5.12.2022
 ###############################################################################
 
 library(TTR)
@@ -249,7 +249,7 @@ plotFC <- function()
     plot <- biplaR::savePlot(test_2_plot, tmpdir = 'img', height = plot_height)
     }
     
-    sj_s <- c('2019/20', '2020/21', '2021/22')
+    sj_s <- c('2019/20', '2020/21', '2021/22', '2022/23')
     result_2 <- getSeriesFC_2(base_data = data, sj_s = sj_s,
                               hw_alpha = hw_alpha, hw_beta = hw_beta, hw_gamma = hw_gamma)
     plot_data_2 <- result_2$tbl %>%

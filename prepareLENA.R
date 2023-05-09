@@ -1,13 +1,13 @@
 # prepare BISTA LENA data for monitoring covid19
 #
 # Authors: Flavian Imlig <flavian.imlig@bi.zh.ch>
-# Date: 24.11.2020
+# Date: 9.05.2023
 ###############################################################################
 
 readMeta <- function(file = 'data/lena_meta.json')
 {
     meta <- jsonlite::read_json(file) %>%
-        purrr::imap_dfc(~tibble('tmp' := 1:2, !!.y := as.character(.x)) %>% select(-.data$tmp))
+        purrr::imap_dfc(~tibble('tmp' := 1:2, !!.y := as.character(.x)) %>% select(-'tmp'))
 }
 
 getData <- function(file = 'data/lena.csv')
@@ -27,7 +27,7 @@ getData <- function(file = 'data/lena.csv')
     data_range <- range(as.POSIXct(str_c(data_raw$jahr, data_raw$monat, '1', sep = '-')))
     
     data_t <- data_raw %>%
-        gather('variable_short', 'value', -.data$jahr, -.data$monat) %>%
+        pivot_longer(matches('lehrstellen'), names_to = 'variable_short', values_to = 'value') %>%
         mutate_at('variable_short', fct_inorder) %>%
         mutate_at('value', as.integer) %>%
         drop_na() %>%
